@@ -1,0 +1,9 @@
+[keys.normal]
+j = "move_char_left"  # j = 左
+k = "move_visual_line_down"  # k = 下
+i = "move_visual_line_up"  # i = 上
+h = "insert_mode"  # h = insert
+H = "insert_at_line_start"  # H = 行首插入
+
+[editor.cursor-shape]
+insert = "bar"
