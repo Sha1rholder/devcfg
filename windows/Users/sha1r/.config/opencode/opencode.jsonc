@@ -1,0 +1,16 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"permission": {
+		"websearch": "allow",
+		"bash": {
+			"*": "ask",
+			"pwd": "allow",
+			"git*": "ask",
+			"ls *": "allow",
+			"grep *": "allow",
+			"rg": "allow",
+			"pwsh": "ask"
+		},
+		"edit": "ask"
+	}
+}

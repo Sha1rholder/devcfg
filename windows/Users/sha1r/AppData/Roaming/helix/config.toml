@@ -1,9 +1,34 @@
-[keys.normal]
-j = "move_char_left"  # j = 左
-k = "move_visual_line_down"  # k = 下
-i = "move_visual_line_up"  # i = 上
-h = "insert_mode"  # h = insert
-H = "insert_at_line_start"  # H = 行首插入
+theme = "sha1"
+
+[editor]
+color-modes = true
 
 [editor.cursor-shape]
 insert = "bar"
+
+[keys.normal]
+j = "move_char_left"
+k = "move_visual_line_down"
+i = "move_visual_line_up"
+h = "insert_mode"
+H = "insert_at_line_start"
+
+y = ":clipboard-yank"
+p = ":clipboard-paste-after"
+P = ":clipboard-paste-before"
+
+A-d = "delete_selection"
+d = "delete_selection_noyank"
+A-c = "change_selection"
+c = "change_selection_noyank"
+
+[keys.select]
+j = "extend_char_left"
+k = "extend_visual_line_down"
+i = "extend_visual_line_up"
+h = "insert_mode"
+H = "insert_at_line_start"
+
+y = ":clipboard-yank"
+p = ":clipboard-paste-after"
+P = ":clipboard-paste-before"

@@ -1,0 +1,6 @@
+inherits = "default"
+"ui.background" = {}
+"ui.text" = {}
+
+"ui.statusline.insert" = { bg = "#2e8b57" }  # 插入模式 - 绿色（最推荐醒目）
+"ui.statusline.select" = { bg = "#cc5500" }  # 选择模式 - 橙色
