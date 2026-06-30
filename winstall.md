@@ -1,5 +1,3 @@
-<https://tar-pits.com/bnoqwernhqvam/764nmp1k9u2ebv1i>
-
 ```ps1
 irm https://get.activated.win | iex
 
@@ -24,7 +22,7 @@ winget pin add --id LeiGod.LeiGodAcc
 
 Add-VpnConnection -Name "UoE" -ServerAddress "remote.net.ed.ac.uk" -TunnelType L2tp -L2tpPsk "Zt6337ZnVLhN" -Force # s2274292 Sdfsdf244244
 
-winget install --id 2dust.v2rayN
+winget install --id 2dust.v2rayN # https://api.tar-pits.com/5002af3a2490968494f5a746fe01603f/ngvqtnty9qb4qperoinbtqer
 winget install --id Microsoft.PowerShell --source winget --installer-type wix
 
 winget install --id Rime.Weasel
