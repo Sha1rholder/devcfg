@@ -2,6 +2,9 @@
 	name = Sha1rholder
 	email = sha1rholder@outlook.com
 [http]
-	proxy = socks5h://127.0.0.1:22727
+	proxy = socks5h://localhost:22727
 [https]
-	proxy = socks5h://127.0.0.1:22727
+	proxy = socks5h://localhost:22727
+[credential]
+	helper =
+	helper = !gh auth git-credential
