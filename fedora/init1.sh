@@ -1,3 +1,7 @@
+#!/usr/env/bin bash
+set -Eeuo pipefail
+
+
 # 添加Nushell官方源
 echo "[gemfury-nushell]
 name=Gemfury Nushell Repo
