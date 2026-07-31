@@ -1,14 +1,13 @@
-# 新装Ubuntu 26.04 LTS流程
+# 新装Fedora KDE Plasma Desktop 44流程
 
 ```bash
 # 免密码sudo
-echo 'sha1r ALL=(ALL:ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/sha1r >/dev/null && sudo chmod 440 /etc/sudoers.d/sha1r && sudo visudo -c
+echo 'sha1r ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/sha1r >/dev/null && sudo chmod 440 /etc/sudoers.d/sha1r && sudo visudo -c
 ```
 
 ```bash
 # 更新系统
-sudo apt update
-sudo apt full-upgrade -y
+sudo dnf upgrade --refresh -y
 sudo reboot
 ```
 
@@ -20,15 +19,18 @@ sudo reboot
 
 ```bash
 # 添加Nushell官方源
-wget -qO- https://apt.fury.io/nushell/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/fury-nushell.gpg
-echo "deb [signed-by=/etc/apt/keyrings/fury-nushell.gpg] https://apt.fury.io/nushell/ /" | sudo tee /etc/apt/sources.list.d/fury-nushell.list
-sudo apt update
-sudo apt install -y nushell
+echo "[gemfury-nushell]
+name=Gemfury Nushell Repo
+baseurl=https://yum.fury.io/nushell/
+enabled=1
+gpgcheck=0
+gpgkey=https://yum.fury.io/nushell/gpg.key" | sudo tee /etc/yum.repos.d/fury-nushell.repo
+sudo dnf install -y nushell
 ```
 
 ```bash
 # 安装软件
-sudo apt install -y curl helix ripgrep git gh uv rustup ffmpeg
+sudo dnf install -y curl helix ripgrep git gh uv rustup ffmpeg
 
 curl -fSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
 curl -fSL https://zed.dev/install.sh | bash
@@ -38,7 +40,7 @@ curl -fSL https://chatgpt.com/codex/install.sh | bash
 ```bash
 # 同步 .config/
 mkdir -p "$HOME/.config"
-cp -a ubuntu/.config/. "$HOME/.config/"
+cp -a fedora/.config/. "$HOME/.config/"
 ```
 
 ```bash
