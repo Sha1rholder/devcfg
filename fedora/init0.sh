@@ -1,67 +1,54 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-export LC_ALL=C
+# 声明路径
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+SCRIPT_PATH="${SCRIPT_DIR}/$(basename -- "${BASH_SOURCE[0]}")"
+TEMP_DIR="${SCRIPT_DIR}/temp"
 
-# 整个脚本统一使用 root 权限
+# 整个脚本统一使用root权限
 if ((EUID != 0)); then
-	exec sudo /usr/bin/env bash "$0" "$@"
+	exec sudo /usr/bin/env bash "$SCRIPT_PATH" "$@"
 fi
+cd -- "$SCRIPT_DIR"
+
+# 确认允许非自由软件源
+read -r -p 'Have you enabled non-free software sources? [Y/n] ' answer
+case "$answer" in
+'' | y | Y) ;;
+*)
+	printf 'Aborted.\n'
+	exit 0
+	;;
+esac
+
+LOG_FILE="/var/log/init0.log"
+touch "$LOG_FILE"
+exec > >(tee -a "$LOG_FILE") 2>&1
+printf '\n[%s] Start init0\n' "$(date '+%Y-%m-%d %H:%M:%S')"
 
 TARGET_USER="sha1r"
 OVERRIDE_FILE="/etc/dnf/repos.override.d/zz-cn-mirrors.repo"
+mkdir -p -- "$TEMP_DIR"
 
 die() {
-	printf '错误：%s\n' "$*" >&2
+	printf 'Error: %s\n' "$*" >&2
 	exit 1
 }
 
-command -v dnf5 >/dev/null 2>&1 ||
-	die "没有找到 dnf5"
+FEDORA_VERSION="$(rpm -E '%fedora')" # for x64 only
 
-command -v visudo >/dev/null 2>&1 ||
-	die "没有找到 visudo"
+echo "Configure passwordless sudo for ${TARGET_USER}"
 
-FEDORA_VERSION="$(rpm -E '%fedora')"
-BASE_ARCH="$(rpm -E '%_arch')"
+sudoers_tmp="$(mktemp "$TEMP_DIR/.${TARGET_USER}.XXXXXX")"
 
-[[ "$FEDORA_VERSION" == "44" ]] ||
-	die "此脚本仅适用于 Fedora 44，当前为 Fedora ${FEDORA_VERSION}"
-
-[[ "$BASE_ARCH" == "x86_64" ]] ||
-	die "USTC Fedora 镜像当前仅标注支持 x86_64，当前架构为 ${BASE_ARCH}"
-
-id "$TARGET_USER" >/dev/null 2>&1 ||
-	die "用户 ${TARGET_USER} 不存在"
-
-sudoers_tmp=""
-repo_tmp=""
-
-cleanup() {
-	if [[ -n "$sudoers_tmp" ]]; then
-		rm -f -- "$sudoers_tmp"
-	fi
-
-	if [[ -n "$repo_tmp" ]]; then
-		rm -f -- "$repo_tmp"
-	fi
-}
-
-trap cleanup EXIT
-
-echo "==> 配置 ${TARGET_USER} 免密码 sudo"
-
-sudoers_tmp="$(mktemp "/etc/sudoers.d/.${TARGET_USER}.XXXXXX")"
-
-printf '%s ALL=(ALL:ALL) NOPASSWD: ALL\n' "$TARGET_USER" \
-	>"$sudoers_tmp"
+printf '%s ALL=(ALL:ALL) NOPASSWD: ALL\n' "$TARGET_USER" >"$sudoers_tmp"
 
 chmod 0440 "$sudoers_tmp"
 
 visudo -cf "$sudoers_tmp" >/dev/null
 
 mv -f -- "$sudoers_tmp" "/etc/sudoers.d/${TARGET_USER}"
-sudoers_tmp=""
 
 if command -v restorecon >/dev/null 2>&1; then
 	restorecon -F "/etc/sudoers.d/${TARGET_USER}" || true
@@ -69,13 +56,11 @@ fi
 
 visudo -c >/dev/null
 
-echo "==> 安装 RPM Fusion release 包"
+echo "Install RPM Fusion release packages"
 
-dnf5 install -y \
-	"https://mirrors.ustc.edu.cn/rpmfusion/free/fedora/rpmfusion-free-release-${FEDORA_VERSION}.noarch.rpm" \
-	"https://mirrors.ustc.edu.cn/rpmfusion/nonfree/fedora/rpmfusion-nonfree-release-${FEDORA_VERSION}.noarch.rpm"
+dnf install -y "https://mirrors.ustc.edu.cn/rpmfusion/free/fedora/rpmfusion-free-release-${FEDORA_VERSION}.noarch.rpm" "https://mirrors.ustc.edu.cn/rpmfusion/nonfree/fedora/rpmfusion-nonfree-release-${FEDORA_VERSION}.noarch.rpm"
 
-echo "==> 写入 DNF5 国内镜像覆盖配置"
+echo "Write dnf mirror override configuration"
 
 install -d -m 0755 /etc/dnf/repos.override.d
 
@@ -87,12 +72,12 @@ if [[ -e "$OVERRIDE_FILE" ]]; then
 fi
 
 repo_tmp="$(
-	mktemp /etc/dnf/repos.override.d/.zz-cn-mirrors.repo.XXXXXX
+	mktemp "$TEMP_DIR/.zz-cn-mirrors.repo.XXXXXX"
 )"
 
 cat >"$repo_tmp" <<'REPO'
-# Fedora 官方仓库
-# 仅覆盖下载地址；GPG key、gpgcheck、enabled 等继承系统原配置。
+# Fedora official repo
+# Covers only the download URL; GPG key, gpgcheck, enabled, and other settings inherit the system's original configuration.
 
 [fedora]
 metalink=
@@ -105,7 +90,7 @@ mirrorlist=
 baseurl=https://mirrors.ustc.edu.cn/fedora/updates/$releasever/Everything/$basearch/
 
 # RPM Fusion
-# 对应仓库由 rpmfusion-*-release 软件包创建。
+# The corresponding repository is created by the `rpmfusion-*-release` packages.
 
 [rpmfusion-free]
 metalink=
@@ -130,14 +115,13 @@ REPO
 
 chmod 0644 "$repo_tmp"
 mv -f -- "$repo_tmp" "$OVERRIDE_FILE"
-repo_tmp=""
 
-echo "==> 清理缓存"
-dnf5 clean all
+echo "Clean the cache"
+dnf clean all
 
-echo "==> 验证已修改的仓库"
+echo "Verify modified repositories"
 
-if ! dnf5 --refresh \
+if ! dnf --refresh \
 	--repo=fedora \
 	--repo=updates \
 	--repo=rpmfusion-free \
@@ -145,7 +129,7 @@ if ! dnf5 --refresh \
 	--repo=rpmfusion-nonfree \
 	--repo=rpmfusion-nonfree-updates \
 	makecache; then
-	echo "镜像验证失败，正在恢复原配置。" >&2
+	echo "Mirror verification failed; restoring the original configuration." >&2
 
 	if [[ -n "$backup_file" ]]; then
 		cp -a -- "$backup_file" "$OVERRIDE_FILE"
@@ -153,10 +137,9 @@ if ! dnf5 --refresh \
 		rm -f -- "$OVERRIDE_FILE"
 	fi
 
-	dnf5 clean all || true
+	dnf clean all || true
 	exit 1
 fi
 
-echo "==> 更新系统"
-dnf5 upgrade -y
+dnf upgrade -y --refresh --allow-downgrade --allowerasing
 systemctl reboot
