@@ -1,0 +1,6 @@
+[tui.keymap.composer]
+submit = "ctrl-enter"
+queue = "ctrl-alt-enter"
+
+[tui.keymap.global]
+open_transcript = "ctrl-alt-t"

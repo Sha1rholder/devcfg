@@ -1,0 +1,6 @@
+inherits = "default"
+"ui.background" = {}
+"ui.text" = {}
+
+"ui.statusline.insert" = { bg = "#2e8b57" }
+"ui.statusline.select" = { bg = "#cc5500" }

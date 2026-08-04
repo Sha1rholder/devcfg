@@ -1,0 +1,37 @@
+theme = "sha1"
+
+[editor]
+color-modes = true
+
+[editor.cursor-shape]
+insert = "bar"
+
+[editor.soft-wrap]
+enable = true
+
+[keys.normal]
+j = "move_char_left"
+k = "move_visual_line_down"
+i = "move_visual_line_up"
+h = "insert_mode"
+H = "insert_at_line_start"
+
+y = ":clipboard-yank"
+p = ":clipboard-paste-after"
+P = ":clipboard-paste-before"
+
+A-d = "delete_selection"
+d = "delete_selection_noyank"
+A-c = "change_selection"
+c = "change_selection_noyank"
+
+[keys.select]
+j = "extend_char_left"
+k = "extend_visual_line_down"
+i = "extend_visual_line_up"
+h = "insert_mode"
+H = "insert_at_line_start"
+
+y = ":clipboard-yank"
+p = ":clipboard-paste-after"
+P = ":clipboard-paste-before"

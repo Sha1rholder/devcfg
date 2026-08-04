@@ -1,0 +1,6 @@
+[format.rules]
+indent-style = "tab"
+
+[[schemas]]
+path = "https://raw.githubusercontent.com/rvben/rumdl/main/rumdl.schema.json"
+include = ["**/.rumdl.toml"]
